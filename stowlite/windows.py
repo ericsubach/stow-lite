@@ -61,7 +61,11 @@ class StowLiteWindows(stowlite.istow.IStow):
       return tFilesAndDirsToLink
    
    def makeLink(self, aFileOrDirPathSource, aDestinationDir):
-      print 'Making link for {} to {}'.format(aFileOrDirPathSource, aDestinationDir)
+      if not self.options.dryRun:
+         print 'Making link for {} to {}'.format(aFileOrDirPathSource, aDestinationDir)
+      else:
+         print 'Would have hade link for {} to {}'.format(aFileOrDirPathSource, aDestinationDir)
+         return
    
       if False:
       #if self.options.cygwin:
@@ -89,7 +93,9 @@ class StowLiteWindows(stowlite.istow.IStow):
                if os.path.isfile(tDestinationFilePath):
                   os.remove(tDestinationFilePath)
                elif os.path.isdir(tDestinationFilePath):
-                  os.rmdir(tDestinationFilePath)
+                  #os.rmdir(tDestinationFilePath)
+                  # FIXME This causes some problems if the symlink is still there from the first run.
+                  os.unlink(tDestinationFilePath)
                else:
                   raise Exception('Neither a file nor directory.')
             
@@ -130,3 +136,5 @@ class StowLiteWindows(stowlite.istow.IStow):
       except subprocess.CalledProcessError as tException:
          # TODO: shouldn't exit. probably just want to return a code or rethrow a different exception.
          sys.exit(tException)
+
+# TODO exit gracefully if insufficient privileges
